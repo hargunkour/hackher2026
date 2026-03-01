@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import DeviceAccess from './device_access';
 import FinanceAccess from './financial_access';
+import SocialAccess from './social_access';
 
 type Category = "device" | "social" | "finance";
 
@@ -68,7 +69,7 @@ export default function Quiz() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [nextSection, setNextSection] = useState<Category | null>(null);
-  const [isComplete, setIsComplete] = useState(false);
+  const [completedSections, setCompletedSections] = useState<Set<Category>>(new Set());
 
   const handleAnswer = (answer: boolean) => {
     const currentQuestion = QUESTIONS[currentIndex];
@@ -81,34 +82,36 @@ export default function Quiz() {
       const section = determineNextPage(newAnswers);
       if (section) {
         setNextSection(section);
-      } else {
-        setIsComplete(true);
       }
     }
   };
 
   const handleSectionComplete = (section: Category) => {
+    const newCompleted = new Set(completedSections);
+    newCompleted.add(section);
+    setCompletedSections(newCompleted);
+
     if (section === "device") {
       if (anyYes(["f7", "f8"], answers)) {
         setNextSection("finance");
       } else if (anyYes(["s1", "s2", "s3"], answers)) {
         setNextSection("social");
       } else {
-        setIsComplete(true);
+        setNextSection(null);
       }
     } else if (section === "finance") {
       if (anyYes(["s1", "s2", "s3"], answers)) {
         setNextSection("social");
       } else {
-        setIsComplete(true);
+        setNextSection(null);
       }
     } else if (section === "social") {
-      setIsComplete(true);
+      setNextSection(null);
     }
   };
 
-  // Show empty completion page
-  if (isComplete) {
+  // Show empty completion page when all sections are done
+  if (nextSection === null && completedSections.size > 0) {
     return <View style={{ flex: 1 }} />;
   }
 
@@ -117,9 +120,6 @@ export default function Quiz() {
     return (
       <DeviceAccess 
         onComplete={() => handleSectionComplete("device")}
-        onBack={() => {
-          setNextSection(null);
-        }}
       />
     );
   }
@@ -129,16 +129,17 @@ export default function Quiz() {
     return (
       <FinanceAccess 
         onComplete={() => handleSectionComplete("finance")}
-        onBack={() => {
-          setNextSection(null);
-        }}
       />
     );
   }
 
-  // Show Social section placeholder
+  // Show SocialAccess if needed
   if (nextSection === "social") {
-    return <Text>Social Access Section - Coming Soon</Text>;
+    return (
+      <SocialAccess 
+        onComplete={() => handleSectionComplete("social")}
+      />
+    );
   }
 
   const currentQuestion = QUESTIONS[currentIndex];

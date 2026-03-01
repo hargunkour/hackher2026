@@ -55,10 +55,9 @@ const FINANCE_CHECKS: FinanceCheck[] = [
 
 type FinanceAccessProps = {
   onComplete: (checkedItems: string[]) => void;
-  onBack: () => void;
 };
 
-export default function FinanceAccess({ onComplete, onBack }: FinanceAccessProps) {
+export default function FinanceAccess({ onComplete }: FinanceAccessProps) {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
   const toggleCheck = (id: string) => {
@@ -67,7 +66,6 @@ export default function FinanceAccess({ onComplete, onBack }: FinanceAccessProps
       [id]: !prev[id],
     }));
   };
-  
 
   const handleComplete = () => {
     const completed = Object.keys(checkedItems).filter((key) => checkedItems[key]);
@@ -110,9 +108,6 @@ export default function FinanceAccess({ onComplete, onBack }: FinanceAccessProps
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
           <Text style={styles.completeButtonText}>Complete</Text>
         </TouchableOpacity>
@@ -219,21 +214,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
     gap: 12,
-  },
-  backButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#ddd',
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
   },
   completeButton: {
     flex: 1,
