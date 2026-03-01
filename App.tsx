@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Button } from 'react-native';
 import React, { useState } from 'react';
 
 //PAGES
@@ -13,6 +13,14 @@ import DashboardScreen from "./riskDashboard";
 
 const Stack = createNativeStackNavigator();
 
+const resourcesButton = (navigation: any) => ({
+  headerRight: () => (
+    <Button
+      title="Resources"
+      onPress={() => navigation.navigate('Resources')}
+    />
+  ),
+});
 
 function MainScreen() {
   const [activeTab, setActiveTab] = useState('Chapters');
@@ -55,8 +63,11 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Sign In">
         <Stack.Screen name="Sign In" component={SignInScreen} />
-        <Stack.Screen name="exEmail" component={ExEmailScreen} />
-        <Stack.Screen name="riskDashboard" component={DashboardScreen} />
+        <Stack.Screen name="exEmail" component={ExEmailScreen} options={({ navigation }) => resourcesButton(navigation)} />
+        <Stack.Screen name="riskDashboard" component={DashboardScreen} options={({ navigation }) => resourcesButton(navigation)} />
+        <Stack.Screen name="Quiz" component={Quiz} options={({ navigation }) => resourcesButton(navigation)} />
+        <Stack.Screen name="Main" component={MainScreen} options={({ navigation }) => resourcesButton(navigation)} />
+        <Stack.Screen name="Resources" component={ResourcesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

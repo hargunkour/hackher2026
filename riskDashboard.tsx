@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, Button } from 'react-native';
 
-export default function DashboardScreen({ route }: { route: any }) {
+export default function DashboardScreen({ route, navigation }: { route: any, navigation: any }) {
     const { user, token, exEmail } = route.params;
 
     const [loading, setLoading] = useState(true);
@@ -181,6 +181,9 @@ export default function DashboardScreen({ route }: { route: any }) {
             {expandGmail && gmailSubscriptions.map((msg: any) => (
                 <Text key={msg.id}>• {msg.payload?.headers?.find((h: any) => h.name === 'From')?.value}</Text>
             ))}
+
+            <Button title="Continue to Questionnaire" onPress={() => navigation.navigate('Quiz')} />
+
         </ScrollView>
     );
 
