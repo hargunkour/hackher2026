@@ -1,10 +1,54 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
+import React, { useState } from 'react';
+
+//PAGES
+import ResourcesScreen from './ResourcesScreen';
+import Quiz from './page1/quiz';
 import SignInScreen from "./signin";
 import ExEmailScreen from "./exEmail";
 import DashboardScreen from "./riskDashboard";
 
 const Stack = createNativeStackNavigator();
+
+
+function MainScreen() {
+  const [activeTab, setActiveTab] = useState('Chapters');
+
+  return (
+    <View style={styles.container}>
+      {/* Header with Tab Navigation */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>UnLink</Text>
+        <View style={styles.rightButtons}>
+          <Pressable
+            style={[styles.tabButton, activeTab === 'Chapters' && styles.activeTab]}
+            onPress={() => setActiveTab('Chapters')}
+          >
+            <Text style={[styles.tabText, activeTab === 'Chapters' && styles.activeTabText]}>
+              Chapters
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.tabButton, activeTab === 'Resources' && styles.activeTab]}
+            onPress={() => setActiveTab('Resources')}
+          >
+            <Text style={[styles.tabText, activeTab === 'Resources' && styles.activeTabText]}>
+              Resources
+            </Text>
+          </Pressable>
+        </View>
+        <View style={{ flex: 1, paddingTop: 50 }}>
+          <Quiz />
+        </View>
+        {/* Content Area */}
+        <StatusBar style="auto" />
+      </View>
+    </View>
+  );
+}
 
 export default function App() {
   return (
@@ -16,25 +60,52 @@ export default function App() {
       </Stack.Navigator>
     </NavigationContainer>
   );
-
 }
-// import { StatusBar } from 'expo-status-bar';
-// import { StyleSheet, Text, View } from 'react-native';
 
-// export default function App() {
-//   return (
-//     <View style={styles.container}>
-//       <Text>Open up App.tsx to start working on your app!</Text>
-//       <StatusBar style="auto" />
-//     </View>
-//   );
-// }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    height: 70,
+    backgroundColor: '#6C63FF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  rightButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  tabButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  activeTab: {
+    backgroundColor: 'white',
+  },
+  tabText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  activeTabText: {
+    color: '#6C63FF',
+  },
+  contentContainer: {
+    flex: 1,
+  },
+});
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-// });
+
