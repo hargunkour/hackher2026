@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image } from 'react-native';
+import { useFonts } from 'expo-font';
 
 type DeviceCheck = {
   id: string;
@@ -58,13 +59,15 @@ type DeviceAccessProps = {
 };
 
 export default function DeviceAccess({ onComplete }: DeviceAccessProps) {
+  const [fontsLoaded] = useFonts({
+    'NoTears': require('../assets/fonts/No Tears.ttf'),
+    'NoTears-Bold': require('../assets/fonts/No Tears Bold.ttf'),
+  });
+
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
 
   const toggleCheck = (id: string) => {
-    setCheckedItems((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    setCheckedItems((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleComplete = () => {
@@ -76,157 +79,271 @@ export default function DeviceAccess({ onComplete }: DeviceAccessProps) {
   const progressPercentage = (completedCount / DEVICE_CHECKS.length) * 100;
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Device Access Security</Text>
-        <Text style={styles.subtitle}>Complete these steps to secure your devices</Text>
-
-        {/* Pink Progress Bar */}
-        <View style={styles.progressBarContainer}>
-          <View style={[styles.progressBar, { width: `${progressPercentage}%` }]} />
-        </View>
-      </View>
-
-      <View style={styles.checklistContainer}>
-        {DEVICE_CHECKS.map((check) => (
-          <View key={check.id} style={styles.checkItem}>
-            <TouchableOpacity 
-              style={styles.checkboxContainer}
-              onPress={() => toggleCheck(check.id)}
-            >
-              <View style={[styles.checkbox, checkedItems[check.id] && styles.checkboxChecked]}>
-                {checkedItems[check.id] && <Text style={styles.checkmark}>✓</Text>}
-              </View>
-            </TouchableOpacity>
-
-            <View style={styles.checkContent}>
-              <Text style={styles.checkTitle}>{check.title}</Text>
-              <Text style={styles.checkDescription}>{check.description}</Text>
-              <Text style={styles.checkInstructions}>{check.instructions}</Text>
-            </View>
-          </View>
+    <ScrollView contentContainerStyle={styles.page}>
+      {/* Lined notebook paper background — identical to quiz.tsx */}
+      <View style={styles.linesContainer} pointerEvents="none">
+        {Array.from({ length: 50 }).map((_, i) => (
+          <View key={i} style={styles.line} />
         ))}
       </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
-          <Text style={styles.completeButtonText}>Complete</Text>
-        </TouchableOpacity>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={[styles.chapterLabel, { fontFamily: fontsLoaded ? 'NoTears-Bold' : 'Georgia' }]}>
+          Device Access
+        </Text>
+        <Text style={styles.diaryEntry}>Dear Diary,</Text>
+        <Text style={styles.diaryBody}>Let me lock things down, one step at a time...</Text>
       </View>
+
+      {/* Progress — plain text, no card */}
+      <View style={styles.progressLabelRow}>
+        <Text style={[styles.progressLabel, { fontFamily: fontsLoaded ? 'NoTears-Bold' : 'Georgia' }]}>
+          Progress
+        </Text>
+        <Text style={[styles.progressCount, { fontFamily: fontsLoaded ? 'NoTears-Bold' : 'Georgia' }]}>
+          {completedCount} / {DEVICE_CHECKS.length}
+        </Text>
+      </View>
+      <View style={styles.progressBarContainer}>
+        <View style={[styles.progressBar, { width: `${progressPercentage}%` as any }]} />
+      </View>
+
+      {/* Checklist — each item uses same card style */}
+      <View style={styles.checklistContainer}>
+        {DEVICE_CHECKS.map((check) => (
+          <TouchableOpacity
+            key={check.id}
+            style={[styles.card, styles.checkItem, checkedItems[check.id] && styles.checkItemDone]}
+            onPress={() => toggleCheck(check.id)}
+            activeOpacity={0.75}
+          >
+            <View style={[styles.checkbox, checkedItems[check.id] && styles.checkboxChecked]}>
+              {checkedItems[check.id] && <Text style={styles.checkmark}>✓</Text>}
+            </View>
+            <View style={styles.checkContent}>
+              <Text style={[
+                styles.checkTitle,
+                { fontFamily: fontsLoaded ? 'NoTears-Bold' : 'Georgia' },
+                checkedItems[check.id] && styles.checkTitleDone,
+              ]}>
+                {check.title}
+              </Text>
+              <Text style={styles.checkDescription}>{check.description}</Text>
+              <Text style={styles.checkInstructions}>{check.instructions}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Complete button — same shape as quiz.tsx answer buttons, filled pink */}
+      <TouchableOpacity style={styles.completeButton} onPress={handleComplete} activeOpacity={0.8}>
+        <Text style={[styles.completeButtonText, { fontFamily: fontsLoaded ? 'NoTears-Bold' : 'Georgia' }]}>
+          Complete
+        </Text>
+      </TouchableOpacity>
+
     </ScrollView>
   );
 }
 
+const CARD_BG = '#e8e0e8';
+const LINE_COLOR = '#d8d0dc';
+const TEXT_DARK = '#1a1a2e';
+const TEXT_PINK = '#c0607a';
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
+  // ── Page ─────────────────────────────────────────────────────────────
+  page: {
+    flexGrow: 1,
+    backgroundColor: '#faf5f7',
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 40,
+    position: 'relative',
   },
+
+  // ── Lined paper (identical to quiz.tsx) ──────────────────────────────
+  linesContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingTop: 60,
+    gap: 0,
+  },
+  line: {
+    height: 1,
+    backgroundColor: LINE_COLOR,
+    marginVertical: 11,
+    opacity: 0.5,
+  },
+
+  // ── Header (identical to quiz.tsx) ───────────────────────────────────
   header: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    alignItems: 'center',
+    marginBottom: 24,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+  chapterLabel: {
+    fontSize: 36,
+    fontWeight: '700',
+    color: TEXT_DARK,
     marginBottom: 8,
   },
-  subtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 16,
-    textAlign: 'center',
+  diaryEntry: {
+    fontFamily: 'Georgia',
+    fontSize: 16,
+    color: TEXT_PINK,
+    fontStyle: 'italic',
+    opacity: 0.8,
+    marginTop: 12,
+  },
+  diaryBody: {
+    fontFamily: 'Georgia',
+    fontSize: 16,
+    color: TEXT_PINK,
+    fontStyle: 'italic',
+    opacity: 0.7,
+    marginTop: 4,
+  },
+
+  // ── Stickers (identical to quiz.tsx) ─────────────────────────────────
+  starSticker: {
+    position: 'absolute',
+    top: 178,
+    left: 12,
+    width: 56,
+    height: 56,
+    zIndex: 10,
+  },
+
+  // ── Card (identical to quiz.tsx) ─────────────────────────────────────
+  card: {
+    backgroundColor: CARD_BG,
+    borderRadius: 20,
+    padding: 24,
+    marginTop: 16,
+    marginLeft: 16,
+    shadowColor: '#c090a8',
+    shadowOffset: { width: 2, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+
+  // ── Progress ─────────────────────────────────────────────────────────
+  progressLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    marginTop: 20,
+  },
+  progressLabel: {
+    fontSize: 18,
+    color: TEXT_DARK,
+  },
+  progressCount: {
+    fontSize: 18,
+    color: TEXT_PINK,
   },
   progressBarContainer: {
     width: '100%',
     height: 8,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#d0c0cc',
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#E91E63',
+    backgroundColor: TEXT_PINK,
     borderRadius: 4,
   },
+
+  // ── Checklist ────────────────────────────────────────────────────────
   checklistContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    gap: 0,
   },
   checkItem: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#eee',
+    alignItems: 'flex-start',
   },
-  checkboxContainer: {
-    marginRight: 12,
-    justifyContent: 'flex-start',
-    paddingTop: 2,
+  checkItemDone: {
+    opacity: 0.6,
   },
   checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
+    width: 26,
+    height: 26,
+    borderRadius: 8,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: '#d0b8c4',
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 14,
+    marginTop: 2,
+    flexShrink: 0,
   },
   checkboxChecked: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
+    backgroundColor: TEXT_PINK,
+    borderColor: TEXT_PINK,
   },
   checkmark: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
   },
   checkContent: {
     flex: 1,
   },
   checkTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: 18,
+    color: TEXT_DARK,
     marginBottom: 4,
   },
+  checkTitleDone: {
+    color: TEXT_PINK,
+    textDecorationLine: 'line-through',
+  },
   checkDescription: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 6,
+    fontFamily: 'Georgia',
+    fontSize: 14,
+    color: '#886878',
+    marginBottom: 5,
   },
   checkInstructions: {
-    fontSize: 12,
-    color: '#999',
+    fontFamily: 'Georgia',
+    fontSize: 13,
+    color: '#b088a0',
     fontStyle: 'italic',
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    gap: 12,
-  },
+
+  // ── Complete button (same shape as quiz.tsx answer buttons) ──────────
   completeButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#4CAF50',
-    justifyContent: 'center',
+    marginTop: 16,
+    marginLeft: 16,
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: TEXT_PINK,
     alignItems: 'center',
+    shadowColor: '#c090a8',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
   },
   completeButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
     color: '#fff',
+  },
+
+  // ── Washi tape (identical to quiz.tsx) ───────────────────────────────
+  washiTape: {
+    marginTop: -15,
+    height: 42,
+    width: 120,
+    transform: [{ rotate: '-2deg' }],
+    opacity: 0.85,
   },
 });

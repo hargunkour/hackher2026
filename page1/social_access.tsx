@@ -5,9 +5,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
+  Image,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useFonts } from "expo-font";
 
 type SocialPlatform = {
   id: string;
@@ -74,11 +76,15 @@ type SocialAccessProps = {
 };
 
 export default function SocialAccess({ onComplete }: SocialAccessProps) {
+  const [fontsLoaded] = useFonts({
+    "NoTears": require("../assets/fonts/No Tears.ttf"),
+    "NoTears-Bold": require("../assets/fonts/No Tears Bold.ttf"),
+  });
+
   const [expandedPlatform, setExpandedPlatform] = useState<string | null>(null);
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    // Clear progress on mount
     setCompletedSteps({});
     AsyncStorage.removeItem("socialsProgress");
   }, []);
@@ -101,11 +107,16 @@ export default function SocialAccess({ onComplete }: SocialAccessProps) {
 
   const toggleStepCompletion = (platformId: string, stepIndex: number) => {
     const key = `${platformId}-${stepIndex}`;
-    setCompletedSteps((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    setCompletedSteps((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  const platformList = Object.keys(SOCIAL_PLATFORMS);
+  const completedCount = Object.values(completedSteps).filter(Boolean).length;
+  const totalSteps = Object.values(SOCIAL_PLATFORMS).reduce(
+    (sum, platform) => sum + platform.steps.length,
+    0
+  );
+  const progressPercentage = totalSteps > 0 ? (completedCount / totalSteps) * 100 : 0;
 
   const renderPlatform = ({ item: platformId }: { item: string }) => {
     const platform = SOCIAL_PLATFORMS[platformId];
@@ -114,50 +125,44 @@ export default function SocialAccess({ onComplete }: SocialAccessProps) {
     const platformCompletedCount = steps.filter(
       (_, index) => completedSteps[`${platformId}-${index}`]
     ).length;
+    const platformProgress = steps.length > 0 ? (platformCompletedCount / steps.length) * 100 : 0;
 
     return (
-      <View style={styles.platformCard}>
+      <View style={styles.card}>
+        {/* Platform header row */}
         <TouchableOpacity
           style={styles.platformHeader}
           onPress={() => toggleExpanded(platformId)}
+          activeOpacity={0.75}
         >
           <View style={styles.platformTitleContainer}>
             <View style={styles.iconCircle}>
               <MaterialCommunityIcons
                 name={platform.icon as any}
-                size={24}
-                color="#C97D9E"
+                size={22}
+                color={TEXT_PINK}
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.platformName}>{platform.name}</Text>
+              <Text style={[styles.platformName, { fontFamily: fontsLoaded ? "NoTears-Bold" : "Georgia" }]}>
+                {platform.name}
+              </Text>
               <Text style={styles.stepCount}>{steps.length} steps</Text>
             </View>
           </View>
           <MaterialCommunityIcons
             name={isExpanded ? "chevron-up" : "chevron-down"}
-            size={24}
-            color="#C97D9E"
+            size={22}
+            color={TEXT_PINK}
           />
         </TouchableOpacity>
 
+        {/* Expanded steps */}
         {isExpanded && (
           <>
-            <View style={styles.progressSection}>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${
-                        steps.length > 0
-                          ? (platformCompletedCount / steps.length) * 100
-                          : 0
-                      }%`,
-                    },
-                  ]}
-                />
-              </View>
+            {/* Per-platform progress bar */}
+            <View style={styles.platformProgressBar}>
+              <View style={[styles.platformProgressFill, { width: `${platformProgress}%` as any }]} />
             </View>
 
             <View style={styles.stepsContainer}>
@@ -166,25 +171,18 @@ export default function SocialAccess({ onComplete }: SocialAccessProps) {
                   key={index}
                   style={styles.stepItem}
                   onPress={() => toggleStepCompletion(platformId, index)}
+                  activeOpacity={0.75}
                 >
-                  <View
-                    style={[
-                      styles.checkbox,
-                      completedSteps[`${platformId}-${index}`] &&
-                        styles.checkboxChecked,
-                    ]}
-                  >
+                  <View style={[styles.checkbox, completedSteps[`${platformId}-${index}`] && styles.checkboxChecked]}>
                     {completedSteps[`${platformId}-${index}`] && (
                       <Text style={styles.checkmark}>✓</Text>
                     )}
                   </View>
-                  <Text
-                    style={[
-                      styles.stepText,
-                      completedSteps[`${platformId}-${index}`] &&
-                        styles.stepTextCompleted,
-                    ]}
-                  >
+                  <Text style={[
+                    styles.stepText,
+                    { fontFamily: fontsLoaded ? "Georgia" : "Georgia" },
+                    completedSteps[`${platformId}-${index}`] && styles.stepTextCompleted,
+                  ]}>
                     {index + 1}. {step}
                   </Text>
                 </TouchableOpacity>
@@ -196,121 +194,166 @@ export default function SocialAccess({ onComplete }: SocialAccessProps) {
     );
   };
 
-  const platformList = Object.keys(SOCIAL_PLATFORMS);
-  const completedCount = Object.values(completedSteps).filter(Boolean).length;
-  const totalSteps = Object.values(SOCIAL_PLATFORMS).reduce(
-    (sum, platform) => sum + platform.steps.length,
-    0
-  );
-
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Social Media Security</Text>
-        <Text style={styles.headerSubtitle}>Reclaim your digital presence</Text>
-      </View>
+    <FlatList
+      data={platformList}
+      renderItem={renderPlatform}
+      keyExtractor={(item) => item}
+      contentContainerStyle={styles.page}
+      ListHeaderComponent={
+        <>
+          {/* Lined notebook paper */}
+          <View style={styles.linesContainer} pointerEvents="none">
+            {Array.from({ length: 50 }).map((_, i) => (
+              <View key={i} style={styles.line} />
+            ))}
+          </View>
 
-      <View style={styles.overallProgressSection}>
-        <View style={styles.progressBarContainer}>
-          <View
-            style={[
-              styles.progressBar,
-              {
-                width: `${
-                  totalSteps > 0 ? (completedCount / totalSteps) * 100 : 0
-                }%`,
-              },
-            ]}
-          />
-        </View>
-      </View>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={[styles.chapterLabel, { fontFamily: fontsLoaded ? "NoTears-Bold" : "Georgia" }]}>
+              Social Access
+            </Text>
+            <Text style={styles.diaryEntry}>Dear Diary,</Text>
+            <Text style={styles.diaryBody}>Time to reclaim my digital presence...</Text>
+          </View>
 
-      <FlatList
-        data={platformList}
-        renderItem={renderPlatform}
-        keyExtractor={(item) => item}
-        contentContainerStyle={styles.listContent}
-      />
-
-      {completedCount === totalSteps && completedCount > 0 && (
-        <View style={styles.completeButtonContainer}>
-          <TouchableOpacity
-            style={styles.completeButton}
-            onPress={() => onComplete()}
-          >
-            <Text style={styles.completeButtonText}>All Done! ✓</Text>
+          {/* Overall progress — plain text */}
+          <View style={styles.progressLabelRow}>
+            <Text style={[styles.progressLabel, { fontFamily: fontsLoaded ? "NoTears-Bold" : "Georgia" }]}>
+              Progress
+            </Text>
+            <Text style={[styles.progressCount, { fontFamily: fontsLoaded ? "NoTears-Bold" : "Georgia" }]}>
+              {completedCount} / {totalSteps}
+            </Text>
+          </View>
+          <View style={styles.progressBarContainer}>
+            <View style={[styles.progressBar, { width: `${progressPercentage}%` as any }]} />
+          </View>
+        </>
+      }
+      ListFooterComponent={
+        completedCount === totalSteps && completedCount > 0 ? (
+          <TouchableOpacity style={styles.completeButton} onPress={onComplete} activeOpacity={0.8}>
+            <Text style={[styles.completeButtonText, { fontFamily: fontsLoaded ? "NoTears-Bold" : "Georgia" }]}>
+              All Done! ✓
+            </Text>
           </TouchableOpacity>
-        </View>
-      )}
-    </View>
+        ) : null
+      }
+    />
   );
 }
 
+const CARD_BG = "#e8e0e8";
+const LINE_COLOR = "#d8d0dc";
+const TEXT_DARK = "#1a1a2e";
+const TEXT_PINK = "#c0607a";
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
+  page: {
+    flexGrow: 1,
+    backgroundColor: "#faf5f7",
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 40,
+    position: "relative",
   },
+
+  // Lined paper
+  linesContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingTop: 60,
+    gap: 0,
+  },
+  line: {
+    height: 1,
+    backgroundColor: LINE_COLOR,
+    marginVertical: 11,
+    opacity: 0.5,
+  },
+
+  // Header
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
-    alignItems: "center",
-    backgroundColor: "#fff",
+    marginBottom: 24,
   },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 4,
+  chapterLabel: {
+    fontSize: 36,
+    fontWeight: "700",
+    color: TEXT_DARK,
+    marginBottom: 8,
   },
-  headerSubtitle: {
-    fontSize: 14,
-    color: "#666",
-    fontWeight: "400",
+  diaryEntry: {
+    fontFamily: "Georgia",
+    fontSize: 16,
+    color: TEXT_PINK,
+    fontStyle: "italic",
+    opacity: 0.8,
+    marginTop: 12,
   },
-  overallProgressSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#fff",
+  diaryBody: {
+    fontFamily: "Georgia",
+    fontSize: 16,
+    color: TEXT_PINK,
+    fontStyle: "italic",
+    opacity: 0.7,
+    marginTop: 4,
   },
-  progressSection: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
+
+  // Progress
+  progressLabelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+    marginTop: 20,
+  },
+  progressLabel: {
+    fontSize: 18,
+    color: TEXT_DARK,
+  },
+  progressCount: {
+    fontSize: 18,
+    color: TEXT_PINK,
   },
   progressBarContainer: {
     width: "100%",
     height: 8,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: "#d0c0cc",
     borderRadius: 4,
     overflow: "hidden",
+    marginBottom: 4,
   },
   progressBar: {
     height: "100%",
-    backgroundColor: "#E91E63",
+    backgroundColor: TEXT_PINK,
     borderRadius: 4,
   },
-  listContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  platformCard: {
-    marginBottom: 12,
-    backgroundColor: "#fff",
-    borderRadius: 12,
+
+  // Platform card — matches device/finance card style
+  card: {
+    backgroundColor: CARD_BG,
+    borderRadius: 20,
+    marginTop: 16,
+    marginLeft: 16,
+    shadowColor: "#c090a8",
+    shadowOffset: { width: 2, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
   },
+
+  // Platform header row
   platformHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   platformTitleContainer: {
     flexDirection: "row",
@@ -322,27 +365,45 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: "#e0e0e0",
+    borderColor: "#d0b8c4",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
   },
   platformName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
+    fontSize: 18,
+    color: TEXT_DARK,
     marginBottom: 2,
   },
   stepCount: {
+    fontFamily: "Georgia",
     fontSize: 12,
-    color: "#999",
+    color: "#b088a0",
+    fontStyle: "italic",
   },
+
+  // Per-platform progress bar (inside expanded card)
+  platformProgressBar: {
+    height: 6,
+    backgroundColor: "#d0b8c4",
+    marginHorizontal: 20,
+    borderRadius: 3,
+    overflow: "hidden",
+    marginBottom: 4,
+  },
+  platformProgressFill: {
+    height: "100%",
+    backgroundColor: TEXT_PINK,
+    borderRadius: 3,
+  },
+
+  // Steps
   stepsContainer: {
-    borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: "#fafafa",
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: "#f0e8ec",
   },
   stepItem: {
     flexDirection: "row",
@@ -350,48 +411,55 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   checkbox: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
+    borderRadius: 6,
     borderWidth: 2,
-    borderColor: "#ddd",
-    borderRadius: 4,
+    borderColor: "#d0b8c4",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
     marginTop: 2,
+    flexShrink: 0,
   },
   checkboxChecked: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
+    backgroundColor: TEXT_PINK,
+    borderColor: TEXT_PINK,
   },
   checkmark: {
-    color: "white",
+    color: "#fff",
+    fontSize: 13,
     fontWeight: "bold",
-    fontSize: 12,
   },
   stepText: {
     flex: 1,
-    fontSize: 13,
-    color: "#555",
-    lineHeight: 18,
+    fontSize: 15,
+    color: TEXT_DARK,
+    lineHeight: 20,
   },
   stepTextCompleted: {
-    color: "#999",
+    color: TEXT_PINK,
     textDecorationLine: "line-through",
+    opacity: 0.6,
   },
-  completeButtonContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
+
+  // Complete button
   completeButton: {
-    backgroundColor: "#4CAF50",
-    paddingVertical: 14,
-    borderRadius: 10,
+    marginTop: 16,
+    marginLeft: 16,
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: TEXT_PINK,
     alignItems: "center",
+    shadowColor: "#c090a8",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
   },
   completeButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 18,
+    color: "#fff",
   },
 });
