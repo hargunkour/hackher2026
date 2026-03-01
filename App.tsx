@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Pressable, Button } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Button, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 
 //PAGES
@@ -15,10 +15,12 @@ const Stack = createNativeStackNavigator();
 
 const resourcesButton = (navigation: any) => ({
   headerRight: () => (
-    <Button
-      title="Resources"
+    <TouchableOpacity
+      style={{ backgroundColor: '#c0607a', paddingVertical: 6, paddingHorizontal: 14, borderRadius: 6 }}
       onPress={() => navigation.navigate('Resources')}
-    />
+    >
+      <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>Resources</Text>
+    </TouchableOpacity>
   ),
 });
 
