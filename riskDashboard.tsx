@@ -144,7 +144,7 @@ export default function DashboardScreen({ route, navigation }: { route: any, nav
 
             {/* Drive: shared with ex */}
             <TouchableOpacity onPress={() => setExpandDriveShared(!expandDriveShared)}>
-                <Text>{driveSharedFiles.length} files shared with ex {expandDriveShared ? '▲' : '▼'}</Text>
+                <Text>{driveSharedFiles.length} files shared with your partner {expandDriveShared ? '▲' : '▼'}</Text>
             </TouchableOpacity>
             {expandDriveShared && driveSharedFiles.map((file: any) => (
                 <Text key={file.id}>• {file.name}</Text>
@@ -168,7 +168,7 @@ export default function DashboardScreen({ route, navigation }: { route: any, nav
 
             {/* Calendar events with ex */}
             <TouchableOpacity onPress={() => setExpandEvents(!expandEvents)}>
-                <Text>{calendarEvents.length} upcoming events with ex {expandEvents ? '▲' : '▼'}</Text>
+                <Text>{calendarEvents.length} upcoming events with your partner {expandEvents ? '▲' : '▼'}</Text>
             </TouchableOpacity>
             {expandEvents && calendarEvents.map((event: any) => (
                 <Text key={event.id}>• {event.summary}</Text>
@@ -176,7 +176,7 @@ export default function DashboardScreen({ route, navigation }: { route: any, nav
 
             {/* Gmail subscriptions */}
             <TouchableOpacity onPress={() => setExpandGmail(!expandGmail)}>
-                <Text>{gmailSubscriptions.length} subscription emails involving ex {expandGmail ? '▲' : '▼'}</Text>
+                <Text>{gmailSubscriptions.length} subscription emails involving your partner {expandGmail ? '▲' : '▼'}</Text>
             </TouchableOpacity>
             {expandGmail && gmailSubscriptions.map((msg: any) => (
                 <Text key={msg.id}>• {msg.payload?.headers?.find((h: any) => h.name === 'From')?.value}</Text>

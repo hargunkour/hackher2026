@@ -14,7 +14,7 @@ export default function ExEmailScreen({ route, navigation }: { route: any, navig
         <View>
             <Text>Hi {user.displayName}!</Text>
             <Text>Let's begin to secure your digital life.</Text>
-            <Text>Enter your ex's email address:</Text>
+            <Text>Enter your partner's email address:</Text>
             <TextInput
                 placeholder="ex@example.com"
                 value={exEmail}
