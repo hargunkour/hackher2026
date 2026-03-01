@@ -90,20 +90,20 @@ def get_quiz_questions():
 
 """
 SOCIAL MEDIA 
-Have you ever shared your social media passwords with your partner?
+-Have you ever shared your social media passwords with your partner?
 (Instagram, Snapchat, TikTok, etc.)
-Are you logged into your social media accounts on a device they can access?
+-Are you logged into your social media accounts on a device they can access?
 (their phone, shared tablet, shared laptop)
-Do they have access to your email account connected to your social media?
+-Do they have access to your email account connected to your social media?
 (Email access = full account recovery risk)
 
-DEVICE (3)
- Do they know your phone unlock passcode or Face ID pattern?
- Have they ever used your phone or laptop without you present?
- Do you share location with them through apps like Find My, Snapchat, Life360, Google Maps, etc.?
+DEVICE 
+-Do they know your phone unlock passcode or Face ID pattern?
+-Have they ever used your phone or laptop without you present?
+-Do you share location with them through apps like Find My, Snapchat, Life360, Google Maps, etc.?
 
 FINANCE 
- Do they have access to your banking app, credit card, or financial passwords?
- Do you share any subscriptions, shared payment methods, or joint financial accounts?
+-Do they have access to your banking app, credit card, or financial passwords?
+-Do you share any subscriptions, shared payment methods, or joint financial accounts?
 
 """
