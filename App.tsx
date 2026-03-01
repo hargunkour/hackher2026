@@ -1,15 +1,31 @@
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Button } from 'react-native';
 import React, { useState } from 'react';
-import ResourcesScreen from './ResourcesScreen';
-import Ques from './Ques';
-import Quiz from './page1/quiz';
 
-export default function App() {
+//PAGES
+import ResourcesScreen from './ResourcesScreen';
+import Quiz from './page1/quiz';
+import SignInScreen from "./signin";
+import ExEmailScreen from "./exEmail";
+import DashboardScreen from "./riskDashboard";
+
+const Stack = createNativeStackNavigator();
+
+const resourcesButton = (navigation: any) => ({
+  headerRight: () => (
+    <Button
+      title="Resources"
+      onPress={() => navigation.navigate('Resources')}
+    />
+  ),
+});
+
+function MainScreen() {
   const [activeTab, setActiveTab] = useState('Chapters');
 
   return (
-    
     <View style={styles.container}>
       {/* Header with Tab Navigation */}
       <View style={styles.header}>
@@ -32,19 +48,28 @@ export default function App() {
             </Text>
           </Pressable>
         </View>
-            <View style={{ flex: 1, paddingTop: 50 }}>
-      <Quiz />
-    </View>
-  
+        <View style={{ flex: 1, paddingTop: 50 }}>
+          <Quiz />
+        </View>
+        {/* Content Area */}
+        <StatusBar style="auto" />
       </View>
-
-      {/* Content Area */}
-      <View style={styles.contentContainer}>
-        {activeTab === 'Chapters' ? <Ques /> : <ResourcesScreen />}
-      </View>
-
-      <StatusBar style="auto" />
     </View>
+  );
+}
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Sign In">
+        <Stack.Screen name="Sign In" component={SignInScreen} />
+        <Stack.Screen name="exEmail" component={ExEmailScreen} options={({ navigation }) => resourcesButton(navigation)} />
+        <Stack.Screen name="riskDashboard" component={DashboardScreen} options={({ navigation }) => resourcesButton(navigation)} />
+        <Stack.Screen name="Quiz" component={Quiz} options={({ navigation }) => resourcesButton(navigation)} />
+        <Stack.Screen name="Main" component={MainScreen} options={({ navigation }) => resourcesButton(navigation)} />
+        <Stack.Screen name="Resources" component={ResourcesScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
