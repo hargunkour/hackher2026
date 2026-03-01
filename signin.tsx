@@ -4,15 +4,17 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth } from './firebaseConfig';
+import * as AuthSession from 'expo-auth-session';
 
 WebBrowser.maybeCompleteAuthSession();
 
 const WEB_CLIENT_ID = '852536999408-76dole4qkedns9s6qo6svsnkicf8mdgv.apps.googleusercontent.com'
 
 export default function SignInScreen({ navigation }: { navigation: any }) {
+
     const [request, response, promptAsync] = Google.useAuthRequest({
         webClientId: WEB_CLIENT_ID,
-        redirectUri: 'https://auth.expo.io/@p_chan26/hackher2026',
+        redirectUri: 'http://localhost:8081/',
         scopes: [
             'profile',
             'email',
@@ -24,28 +26,29 @@ export default function SignInScreen({ navigation }: { navigation: any }) {
 
     useEffect(() => {
         if (response?.type === 'success') {
-            const { id_token } = response.params;
-            const credential = GoogleAuthProvider.credential(id_token);
-            signInWithCredential(auth, credential).then((userCredential) => {
-                const user = userCredential.user;
-                const token = response.authentication?.accessToken;
-                navigation.navigate('ExEmail', { user, token });
-            });
+            const token = response.authentication?.accessToken;
+            if (token) {
+                fetchUserInfo(token);
+            }
         }
     }, [response]);
 
-    // const fetchUserInfo = async (token: string) => {
-    //     const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-    //         headers: { Authorization: `Bearer ${token}` },
-    //     });
 
-    //     const user = await res.json();
-    //     console.log(user);
+    const fetchUserInfo = async (token: string) => {
+        const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+            headers: { Authorization: `Bearer ${token}` },
+        });
 
-    //     navigation.navigate('ExEmail', { user, token });
-    // };
+        const user = await res.json();
+        console.log(user);
+
+        navigation.navigate('exEmail', { user, token });
+    };
 
     //this part is just basic styling for now
+
+    console.log('REDIRECT URI:', AuthSession.makeRedirectUri());
+
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Text>Breakup Security Kit</Text>
