@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     StyleSheet,
     Dimensions,
+    Image
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
@@ -54,7 +55,7 @@ export default function SignInScreen({ navigation }: { navigation: any }) {
     const [fontsLoaded] = useFonts({
         'NoTears': require('./assets/fonts/No Tears.ttf'),
         'NoTears-Bold': require('./assets/fonts/No Tears Bold.ttf'),
-      });
+    });
     const [request, response, promptAsync] = Google.useAuthRequest({
         webClientId: WEB_CLIENT_ID,
         redirectUri: 'http://localhost:8081/',
@@ -86,14 +87,22 @@ export default function SignInScreen({ navigation }: { navigation: any }) {
 
     return (
         <View style={styles.container}>
-                  
+
 
             {/* Center label sticker */}
             <View style={styles.centered}>
                 <View style={styles.labelOuter}>
                     <View style={styles.labelInner}>
-                        <Text style={styles.heartSticker}>🩷</Text>
-                        <Text style={styles.starSticker}>⭐</Text>
+                        <Image
+                            source={require('./assets/images/goldstar.png')}
+                            style={styles.starSticker2}
+                            resizeMode="contain"
+                        />
+                        <Image
+                            source={require('./assets/images/goldstar.png')}
+                            style={styles.starSticker}
+                            resizeMode="contain"
+                        />
 
                         <Text style={styles.brandText}>UnLink</Text>
                         <View style={styles.divider} />
@@ -116,10 +125,9 @@ export default function SignInScreen({ navigation }: { navigation: any }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#cfc4d3', // soft lavender-white
+        backgroundColor: '#f9e4ea', // soft lavender-white
     },
 
-    
     centered: {
         flex: 1,
         justifyContent: 'center',
@@ -153,7 +161,7 @@ const styles = StyleSheet.create({
         position: 'relative',
     },
 
-    heartSticker: {
+    starSticker2: {
         position: 'absolute',
         top: 12,
         left: 12,
@@ -163,10 +171,12 @@ const styles = StyleSheet.create({
     starSticker: {
         position: 'absolute',
         top: 8,
+
         right: 8,
         fontSize: 26,
         transform: [{ rotate: '14deg' }],
     },
+
 
     brandText: {
         fontFamily: 'NoTears-Bold',
